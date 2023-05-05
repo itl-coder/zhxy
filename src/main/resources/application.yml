@@ -1,0 +1,55 @@
+
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/security?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      username: root
+      password: root
+  redis:
+    host: 192.168.47.129 # 虚拟机 ip
+    port: 6379 # (配置过主从复制)必须使用 master 机器 的端口号
+    database: 0 # 选择的数据库实例
+    connect-timeout: 10000 # 超时时间
+  security:
+    erase_credentials: false
+    role-prefix: ROLE_
+  servlet:
+    multipart:
+      max-file-size: 10MB # 设置单个上传文件的最大大小为 10MB
+      max-request-size: 1000MB # 设置整个请求的最大大小为 10MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+  global-config:
+    # Specify the primary key as auto-increment
+    db-config:
+      id-type: auto
+  type-aliases-package: com.example.zhxy.entity
+  mapper-locations: com/example/zhxy/mapper/*Mapper.xml
+
+logging:
+  level:
+    com.example.baizhisecurity: debug # 查看 SQL
+
+# 修改服务器的过期时间为 1 分钟
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 1
+  error:
+    whitelabel:
+      enabled: false
+    path: /error # 指定自己的错误页面路径,指定的原因是自己对 /error路径添加了访问权限必须以 common/** 资源放行,如果不添加的话默认路径是 /error
+    include-message: always # 指定错误响应中始终包含错误消息的详细信息。
+    include-binding-errors: always #  指定错误响应中始终包含与绑定错误相关的详细信息。 如果将它们的值设置为 never，则不会在错误响应中包含这些信息。
+
+# token 的私钥(加密的盐)
+token:
+  security-key: coder-itl
+
+# 头像上传路径
+zhxy:
+  header-img: D:\zhxy\header\
