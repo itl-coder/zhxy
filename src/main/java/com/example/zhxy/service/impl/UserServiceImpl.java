@@ -38,18 +38,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public IPage<User> getUserByOpr(Page<User> page, User user) {
         log.info("getUserByOpr:{}", user.getUserType());
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        // 根据班级名称模糊查询
-        if (!StringUtils.isEmpty(user.getUsername())) {
-            queryWrapper.like("username", user.getUsername());
+        // 查询具体的用户信息
+        if (!StringUtils.isEmpty(user.getUsername()) && !StringUtils.isEmpty(user.getUserType())) {
+            queryWrapper
+                    .like("username", user.getUsername())
+                    .eq("userType", user.getUserType());
+            Page<User> userPage = baseMapper.selectPage(page, queryWrapper);
+            return userPage;
         }
-        if (!StringUtils.isEmpty(user.getUserType())) {
-            queryWrapper.or().eq("userType", user.getUserType());
+
+        // 否则显示所有普通用户信息
+        if (StringUtils.isEmpty(user.getUsername())) {
+            queryWrapper.eq("userType", user.getUserType());
         }
-        // 降序显示
-        queryWrapper.orderByAsc("id");
-        log.info("queryWrapper: {}", queryWrapper);
         Page<User> userPage = baseMapper.selectPage(page, queryWrapper);
         return userPage;
+
     }
 
     @Override

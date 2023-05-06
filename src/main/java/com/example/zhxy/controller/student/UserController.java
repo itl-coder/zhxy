@@ -31,7 +31,7 @@ public class UserController {
     public ResultModel getUsers(
             @ApiParam(value = "当前页", required = true) @PathVariable("pageNo") Integer pageNo,
             @ApiParam(value = "每页大小", required = true) @PathVariable("pageSize") Integer pageSize,
-            @ApiParam(value = "管理员名称") String username) {
+            @ApiParam(value = "管理员名称")  String username) {
         User user = new User();
         if (!StringUtils.isEmpty(username)) {
             user.setUsername(username);
