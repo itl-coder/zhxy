@@ -33,6 +33,7 @@ public class MyUserDetailService implements UserDetailsService, UserDetailsPassw
         // 2. 查询用户的权限信息
         // 查询角色信息
         List<Role> roles = userMapper.getRoleByUid(user.getId());
+        log.info("roles: {}", roles.toString());
         user.setRoles(roles);
         return new SysUser(user);
     }

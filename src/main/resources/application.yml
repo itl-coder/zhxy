@@ -1,4 +1,3 @@
-
 spring:
   datasource:
     druid:
@@ -22,8 +21,8 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
-    # Specify the primary key as auto-increment
     db-config:
       id-type: auto
   type-aliases-package: com.example.zhxy.entity

@@ -44,6 +44,7 @@ public class CustomSecurityMetadataSource implements FilterInvocationSecurityMet
         String requestURI = ((FilterInvocation) object).getRequest().getRequestURI();
         // 2. 查询所有菜单
         List<Menu> allMenu = menuService.getAllMenu();
+        log.info("allMenuL {}", allMenu.toString());
         for (Menu menu : allMenu) {
             if (antPathMatcher.match(menu.getPattern(), requestURI)) {
                 String[] roles = menu.getRoles().stream().map(r -> r.getName()).toArray(String[]::new);

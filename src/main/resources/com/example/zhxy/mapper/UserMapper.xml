@@ -15,7 +15,7 @@
         select r.*
         from role r,
              user_role ur
-        where r.id = ur.uid
+        where r.id = ur.rid
           and ur.uid = #{uid}
     </select>
 

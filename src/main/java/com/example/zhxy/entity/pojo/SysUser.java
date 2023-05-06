@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class SysUser implements UserDetails, Serializable {
     private User user;
-
     // 权限集合
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

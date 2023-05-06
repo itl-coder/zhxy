@@ -13,7 +13,7 @@
             <result column="name_zh" property="nameZh"/>
         </collection>
     </resultMap>
-    <select id="getAllMenu" resultMap="MenuResultMap">
+    <select id="getAllMenu" resultMap="MenuResultMap" parameterType="string">
         select m.*, r.id, r.name, r.name_zh
         from menu m
                  left join menu_role mr on m.id = mr.mid

@@ -20,7 +20,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -57,7 +59,11 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         //生成jwt
         String jwtToken = jwtUtils.createJwt(strUserInfo, authList);
         log.info("onAuthenticationSuccess jwtToken: {}", jwtToken);
-        ResponseUtil.out(response, ResultModel.success(HttpStatus.OK.value(), "jwt生成成功", jwtToken));
+        Map<String,Object> map = new HashMap<>();
+        map.put("jwtToken",jwtToken);
+        map.put("username",user.getUsername());
+        // 将 map 序列化为 json 字符串
+        ResponseUtil.out(response, ResultModel.success(HttpStatus.OK.value(), "登陆成功", map));
         //将jwt放到redis,设置过期时间和jwt的过期时间
         redisTemplate.opsForValue().set("logintoken:" + jwtToken, objectMapper.writeValueAsString(authentication), 2, TimeUnit.HOURS);
     }

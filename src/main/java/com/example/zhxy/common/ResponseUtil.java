@@ -14,7 +14,7 @@ public class ResponseUtil {
         ObjectMapper objectMapper = new ObjectMapper();
         // 封装 response 的状态码和内容格式
         response.setStatus(HttpStatus.OK.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
         // 内容：resultModel json
         try {
             // 使用jackson，把json格式的resultModel写入到response的输出流中

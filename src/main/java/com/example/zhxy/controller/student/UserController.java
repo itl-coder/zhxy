@@ -1,7 +1,8 @@
-package com.example.zhxy.controller.admin;
+package com.example.zhxy.controller.student;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.zhxy.common.ResultModel;
 import com.example.zhxy.entity.pojo.User;
@@ -12,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,13 +33,14 @@ public class UserController {
             @ApiParam(value = "每页大小", required = true) @PathVariable("pageSize") Integer pageSize,
             @ApiParam(value = "管理员名称") String username) {
         User user = new User();
-        user.setUsername(username);
-        user.setPassword(null);
+        if (!StringUtils.isEmpty(username)) {
+            user.setUsername(username);
+        }
         user.setUserType("3");
         Page<User> page = new Page<>(pageNo, pageSize);
         // 通过服务层查询
-        IPage<User> pageGrade = userService.getUserByOpr(page, user);
-        return ResultModel.success(pageGrade);
+        IPage<User> pageUser = userService.getUserByOpr(page, user);
+        return ResultModel.success(pageUser);
     }
 
     /**

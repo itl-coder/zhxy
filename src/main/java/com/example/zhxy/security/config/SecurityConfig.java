@@ -1,5 +1,7 @@
 package com.example.zhxy.security.config;
 
+import com.example.zhxy.entity.pojo.SysUser;
+import com.example.zhxy.entity.pojo.User;
 import com.example.zhxy.filter.JwtCheckFilter;
 import com.example.zhxy.filter.LoginFilter;
 import com.example.zhxy.security.customer.*;
@@ -93,11 +95,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // 放行资源白名单
     private String[] WHITE = {
             "/error",
-            /************************/
-//            "/admin/**",
-//            "/teacher/**",
-//            "/user/**",
-            /************************/
             "/doc.html",
             "/css/**",
             "/img/**",
@@ -296,21 +293,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public RememberMeServices rememberMeServices() {
         return new MyRememberServices(UUID.randomUUID().toString(), userDetailsService(), persistentTokenRepository());
-    }
-
-    /**
-     * 角色继承关系配置
-     *
-     * @return
-     */
-    @Bean
-    public RoleHierarchy roleHierarchy() {
-        log.info("进入角色继承.............");
-        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-        // admin: [admin teacher user]
-        // teacher: [teacher user]
-        // user: [user]
-        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_TEACHER > ROLE_USER");
-        return hierarchy;
     }
 }

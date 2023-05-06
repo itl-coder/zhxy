@@ -39,10 +39,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         log.info("getUserByOpr:{}", user.getUserType());
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         // 根据班级名称模糊查询
-        queryWrapper.lambda()
-                .like(!StringUtils.isEmpty(user.getUsername()), User::getUsername, user.getUsername());
-        if (!StringUtils.isEmpty(String.valueOf(user.getUserType()))) {
-            queryWrapper.eq("userType", user.getUserType());
+        if (!StringUtils.isEmpty(user.getUsername())) {
+            queryWrapper.like("username", user.getUsername());
+        }
+        if (!StringUtils.isEmpty(user.getUserType())) {
+            queryWrapper.or().eq("userType", user.getUserType());
         }
         // 降序显示
         queryWrapper.orderByAsc("id");
@@ -60,7 +61,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             queryWrapper.like("username", user.getUsername());
         }
         if (!StringUtils.isEmpty(String.valueOf(user.getUserType()))) {
-            queryWrapper.eq("userType", "1");
+            queryWrapper.eq("userType", user.getUserType());
         }
         // 降序显示
         queryWrapper.orderByAsc("id");

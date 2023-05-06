@@ -9,7 +9,7 @@ import com.example.zhxy.entity.pojo.User;
 public interface UserService extends IService<User> {
     IPage<User> getAdminByOpr(Page<User> page, User user);
 
-    IPage<User> getUserByOpr(Page<User> page, User user);
+    IPage<User> getUserByOpr(Page<User> page,  User user);
 
     IPage<User> getTeacherByOpr(Page<User> page, User user);
 }
