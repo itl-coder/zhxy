@@ -1,10 +1,12 @@
 package com.example.zhxy.security.customer;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import com.example.zhxy.common.ResponseUtil;
 import com.example.zhxy.common.ResultModel;
 import com.example.zhxy.entity.pojo.SysUser;
 import com.example.zhxy.entity.pojo.User;
+import com.example.zhxy.entity.vo.LoginVO;
 import com.example.zhxy.utils.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         SysUser securityUser = (SysUser) authentication.getPrincipal();
         log.info("securityUser: {}", securityUser.toString());
         User user = securityUser.getUser();
+        log.info("user: {}", user.toString());
         // 将用户序列化为 字符串
         String strUserInfo = objectMapper.writeValueAsString(user);
         //获取用户的权限信息
@@ -59,12 +62,25 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         //生成jwt
         String jwtToken = jwtUtils.createJwt(strUserInfo, authList);
         log.info("onAuthenticationSuccess jwtToken: {}", jwtToken);
-        Map<String,Object> map = new HashMap<>();
-        map.put("jwtToken",jwtToken);
-        map.put("username",user.getUsername());
+        Map<String, Object> map = new HashMap<>();
+        // 使用属性拷贝工具类将User对象的属性值拷贝到LoginVO对象中
+        map.put("jwtToken", jwtToken);
+        LoginVO loginVO = new LoginVO();
+
+        loginVO = copyUserTologinVo(user, loginVO);
+        map.put("userInfo", loginVO);
         // 将 map 序列化为 json 字符串
         ResponseUtil.out(response, ResultModel.success(HttpStatus.OK.value(), "登陆成功", map));
         //将jwt放到redis,设置过期时间和jwt的过期时间
         redisTemplate.opsForValue().set("logintoken:" + jwtToken, objectMapper.writeValueAsString(authentication), 2, TimeUnit.HOURS);
     }
+
+    private LoginVO copyUserTologinVo(User user, LoginVO loginVO) {
+        log.info("into copyUserTologinVo................");
+        // 调用了 BeanUtil.toBean方法，将User对象转换成LoginVO对象
+        loginVO = BeanUtil.toBean(user, LoginVO.class);
+        return loginVO;
+    }
+
+
 }

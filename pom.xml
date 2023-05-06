@@ -97,6 +97,13 @@
             <artifactId>java-jwt</artifactId>
             <version>3.11.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.7.13</version>
+        </dependency>
+
     </dependencies>
 
     <build>
