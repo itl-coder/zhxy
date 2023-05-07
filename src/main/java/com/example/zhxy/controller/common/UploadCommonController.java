@@ -1,13 +1,20 @@
-package com.example.zhxy.controller.admin;
+package com.example.zhxy.controller.common;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.example.zhxy.common.ResultModel;
+import com.example.zhxy.entity.pojo.User;
 import com.example.zhxy.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -20,12 +27,18 @@ import java.util.UUID;
 @Slf4j
 @Api(tags = "文件上传模块")
 @RestController
-@RequestMapping("/common")
 public class UploadCommonController {
     @Value("${zhxy.header-img}")
     private String uploadPath;
+
+    private final RedisTemplate redisTemplate;
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UploadCommonController(RedisTemplate redisTemplate, UserService userService) {
+        this.redisTemplate = redisTemplate;
+        this.userService = userService;
+    }
 
     @ApiOperation("文件上传")
     @PostMapping("/upload/headerImgUpload")
@@ -45,9 +58,6 @@ public class UploadCommonController {
         String finalPath = uploadPath + newFileName;
         // 保存文件
         try {
-            // 相应文件路径
-            // 判断文件夹路径是否存在
-            // 定义文件夹路径
             // 创建 File 对象
             File folder = new File(uploadPath);
 
@@ -66,9 +76,24 @@ public class UploadCommonController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        // 存储上传文件路径
-
+        updatePhoto(newFileName);
         return ResultModel.success("文件上传成功", newFileName);
+    }
+
+    /**
+     * 更新用户头像的名称
+     *
+     * @param newFileName
+     */
+    private void updatePhoto(String newFileName) {
+        if (!StringUtils.isEmpty(newFileName)) {
+            User user = new User();
+            user.setPhoto(newFileName);
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.gt("userType", "0");
+            userService.update(user, queryWrapper);
+        }
+        return;
     }
 
     @GetMapping("/download")
@@ -95,5 +120,4 @@ public class UploadCommonController {
             throw new RuntimeException(e);
         }
     }
-
 }

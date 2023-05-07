@@ -14,24 +14,21 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory redisConnFactory) {
+    public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        // 设置连接池工厂
-        redisTemplate.setConnectionFactory(redisConnFactory);
-        // 1. 解决 key 的序列化方式
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        // 设置 key 的序列化方式为 String
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         redisTemplate.setKeySerializer(stringRedisSerializer);
-        // 2. 解决 value 的序列化方式
+        redisTemplate.setHashKeySerializer(stringRedisSerializer);
+        // 设置 value 的序列化方式为 JSON，并且支持 LocalDateTime 的序列化
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        // 序列化时将类的数据类型存入 json，以便反序列化的时候转换成正确的类型
         ObjectMapper objectMapper = new ObjectMapper();
-        // 将当前对象的数据类型也存入序列化的结果字符串中
-        // objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-        // 解决jackson2无法反序列化 LocalDateTime的问题
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.registerModule(new JavaTimeModule());
         jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
         return redisTemplate;
     }
 }

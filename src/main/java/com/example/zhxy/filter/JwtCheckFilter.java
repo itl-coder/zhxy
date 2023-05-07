@@ -40,7 +40,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         // 如果是登录请求urI，直接放行
-        if (requestURI.equals("/login") || requestURI.equals("/common/captcha")) {
+        if (requestURI.equals("/login") || requestURI.equals("/common/captcha") || requestURI.equals("/download") || requestURI.equals("/upload/headerImgUpload") ) {
             log.info("放行该请求.................");
             doFilter(request, response, filterChain);
             return;

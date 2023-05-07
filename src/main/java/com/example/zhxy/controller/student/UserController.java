@@ -52,7 +52,6 @@ public class UserController {
     @PostMapping("/save")
     public ResultModel saveOrUpdateUser(
             @ApiParam("班级信息") @RequestBody User user) {
-        user.setPhoto("^-^");
         boolean res = userService.saveOrUpdate(user);
         if (res) {
             return ResultModel.success("操作成功!");

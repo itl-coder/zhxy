@@ -13,11 +13,11 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Clazz {
     private Integer id;
-    private String className;
+    private String grade;
     private int classSize;
+    private String className;
     private String headTeacherName;
     private String headTeacherEmail;
     private String headTeacherPhone;
-    private String grade;
     private String classDescription;
 }

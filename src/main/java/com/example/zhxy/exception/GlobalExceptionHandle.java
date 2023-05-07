@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandle extends RuntimeException {
-
     @ExceptionHandler(value = {Exception.class})
     protected ResultModel handleAllException(Exception ex) {
         return ResultModel.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage().toString());

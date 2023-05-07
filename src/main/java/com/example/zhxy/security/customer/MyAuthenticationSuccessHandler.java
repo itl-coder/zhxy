@@ -66,15 +66,21 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         // 使用属性拷贝工具类将User对象的属性值拷贝到LoginVO对象中
         map.put("jwtToken", jwtToken);
         LoginVO loginVO = new LoginVO();
-
         loginVO = copyUserTologinVo(user, loginVO);
         map.put("userInfo", loginVO);
         // 将 map 序列化为 json 字符串
         ResponseUtil.out(response, ResultModel.success(HttpStatus.OK.value(), "登陆成功", map));
-        //将jwt放到redis,设置过期时间和jwt的过期时间
-        redisTemplate.opsForValue().set("logintoken:" + jwtToken, objectMapper.writeValueAsString(authentication), 2, TimeUnit.HOURS);
+        // 将 jwt 放到 redis,设置过期时间和 jwt 的过期时间
+        redisTemplate.opsForValue().set("logintoken:" + jwtToken, authentication, 2, TimeUnit.HOURS);
     }
 
+    /**
+     * 对象属性拷贝(Hu-tool的工具使用)
+     *
+     * @param user
+     * @param loginVO
+     * @return
+     */
     private LoginVO copyUserTologinVo(User user, LoginVO loginVO) {
         log.info("into copyUserTologinVo................");
         // 调用了 BeanUtil.toBean方法，将User对象转换成LoginVO对象

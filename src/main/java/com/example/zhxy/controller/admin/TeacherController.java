@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/teacher/getTeacher")
 public class TeacherController {
-
     @Autowired
     private UserService userService;
 

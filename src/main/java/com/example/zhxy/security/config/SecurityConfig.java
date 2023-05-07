@@ -1,7 +1,5 @@
 package com.example.zhxy.security.config;
 
-import com.example.zhxy.entity.pojo.SysUser;
-import com.example.zhxy.entity.pojo.User;
 import com.example.zhxy.filter.JwtCheckFilter;
 import com.example.zhxy.filter.LoginFilter;
 import com.example.zhxy.security.customer.*;
@@ -15,8 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -66,19 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final MyAuthenticationFailureHandler myAuthenticationFailureHandler;
 
     @Autowired
-    public SecurityConfig(
-            DataSource dataSource,
-            JwtUtils tokenManager,
-            RedisTemplate redisTemplate,
-            JwtCheckFilter jwtCheckFilter,
-            MyUserDetailService myUserDetailService,
-            MyAccessDeniedHandler myAccessDeniedHandler,
-            MyLogoutSuccessHandler myLogoutSuccessHandler,
-            MyAuthenticationEntryPoint myAuthenticationEntryPoint,
-            CustomSecurityMetadataSource customSecurityMetadataSource,
-            MyAuthenticationFailureHandler myAuthenticationFailureHandler,
-            MyAuthenticationSuccessHandler myAuthenticationSuccessHandler
-    ) {
+    public SecurityConfig(DataSource dataSource, JwtUtils tokenManager, RedisTemplate redisTemplate, JwtCheckFilter jwtCheckFilter, MyUserDetailService myUserDetailService, MyAccessDeniedHandler myAccessDeniedHandler, MyLogoutSuccessHandler myLogoutSuccessHandler, MyAuthenticationEntryPoint myAuthenticationEntryPoint, CustomSecurityMetadataSource customSecurityMetadataSource, MyAuthenticationFailureHandler myAuthenticationFailureHandler, MyAuthenticationSuccessHandler myAuthenticationSuccessHandler) {
         this.dataSource = dataSource;
         this.tokenManager = tokenManager;
         this.redisTemplate = redisTemplate;
@@ -93,18 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     // 放行资源白名单
-    private String[] WHITE = {
-            "/error",
-            "/doc.html",
-            "/css/**",
-            "/img/**",
-            "/druid/**",
-            "/common/**",
-            "/webjars/**",
-            "/*/api-docs",
-            "/swagger-ui.html",
-            "/swagger-resources/**"
-    };
+    private String[] WHITE = {"/error", "/doc.html", "/css/**", "/img/**", "/druid/**", "/common/**", "/webjars/**", "/*/api-docs", "/swagger-ui.html", "/swagger-resources/**"};
 
 
     /**
@@ -179,10 +153,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web
-                .debug(false)
-                .ignoring()
-                .antMatchers(WHITE);
+        web.debug(false).ignoring().antMatchers(WHITE);
     }
 
 
@@ -209,53 +180,48 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 获取工厂对象
         ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
         // 设置自定义 url 权限处理
-        http.apply(new UrlAuthorizationConfigurer<>(applicationContext)).withObjectPostProcessor(
-                new ObjectPostProcessor<FilterSecurityInterceptor>() {
-                    @Override
-                    public <O extends FilterSecurityInterceptor> O postProcess(O object) {
-                        object.setSecurityMetadataSource(customSecurityMetadataSource);
-                        // 是否拒绝公共资源访问 比如访问公共的 验证码(允许访问: false)
-                        object.setRejectPublicInvocations(false);
-                        return object;
-                    }
-                });
+        http.apply(new UrlAuthorizationConfigurer<>(applicationContext)).withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+            @Override
+            public <O extends FilterSecurityInterceptor> O postProcess(O object) {
+                object.setSecurityMetadataSource(customSecurityMetadataSource);
+                // 是否拒绝公共资源访问 比如访问公共的 验证码(允许访问: false)
+                object.setRejectPublicInvocations(false);
+                return object;
+            }
+        });
 
-        http.formLogin()
-                .and()
-                .authorizeRequests()
+        http.formLogin().and().authorizeRequests()
+                // 放行预检请求
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // 注意: /login 不应出现在非安全的 web 放行资源配置中
                 .mvcMatchers("/login", "/logout").permitAll()
+                // 其他所有请求需要认证
                 .anyRequest().authenticated();
 
         http
                 // CSRF 禁用，因为不使用 session
                 .csrf().disable()
-                // 禁用HTTP响应标头
+                // 禁用 HTTP 响应标头
                 .headers().cacheControl().disable().and()
                 // 认证异常的处理
                 .exceptionHandling().authenticationEntryPoint(myAuthenticationEntryPoint)
                 // 授权异常处理
                 .accessDeniedHandler(myAccessDeniedHandler).and()
-                // 基于token，所以不需要session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .headers().frameOptions().disable();
+                // 基于 token，所以不需要 session
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().headers().frameOptions().disable();
 
         // 注销
         http.logout() // 设置为表达式处理器
-
                 // 前后端分离的处理方式，页面不跳转,响应 json 格式
                 .logoutSuccessHandler(myLogoutSuccessHandler)
                 // 清除会话、清楚认证标记、注销成功后的默认跳转到登录页等为默认配置,可以不声明出现
                 // 退出的请求方式指定 GET、POST
-                .logoutRequestMatcher(
-                        new OrRequestMatcher(
-                                new AntPathRequestMatcher("/logout", "POST"),
-                                // 可以指定多种同时指定请求方式
-                                new AntPathRequestMatcher("/myLogout", "POST"))
-                );
+                .logoutRequestMatcher(new OrRequestMatcher(new AntPathRequestMatcher("/logout", "POST"),
+                        // 可以指定多种同时指定请求方式
+                        new AntPathRequestMatcher("/myLogout", "POST")));
 
         // 记住我
-        http.rememberMe()
-                .rememberMeServices(rememberMeServices())
+        http.rememberMe().rememberMeServices(rememberMeServices())
                 // TODO 前后端分离的实现: 设置自动登录使用那个 rememberMe 第二次设置的作用: 解码
                 .tokenValiditySeconds(3600);
         // at: 用来某个 filter 替换过滤器链中那个 filter
