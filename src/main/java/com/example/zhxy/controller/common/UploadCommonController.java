@@ -1,9 +1,6 @@
 package com.example.zhxy.controller.common;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.example.zhxy.common.ResultModel;
-import com.example.zhxy.entity.pojo.User;
 import com.example.zhxy.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -76,26 +73,9 @@ public class UploadCommonController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        updatePhoto(newFileName);
         return ResultModel.success("文件上传成功", newFileName);
     }
-
-    /**
-     * 更新用户头像的名称
-     *
-     * @param newFileName
-     */
-    private void updatePhoto(String newFileName) {
-        if (!StringUtils.isEmpty(newFileName)) {
-            User user = new User();
-            user.setPhoto(newFileName);
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.gt("userType", "0");
-            userService.update(user, queryWrapper);
-        }
-        return;
-    }
-
+    
     @GetMapping("/download")
     public void download(String name, HttpServletResponse response) {
         try {

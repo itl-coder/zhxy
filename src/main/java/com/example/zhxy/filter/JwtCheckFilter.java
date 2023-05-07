@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -40,7 +41,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         // 如果是登录请求urI，直接放行
-        if (requestURI.equals("/login") || requestURI.equals("/common/captcha") || requestURI.equals("/download") || requestURI.equals("/upload/headerImgUpload") ) {
+        if (requestURI.equals("/login") || requestURI.equals("/common/captcha") || requestURI.equals("/download") || requestURI.equals("/upload/headerImgUpload")) {
             log.info("放行该请求.................");
             doFilter(request, response, filterChain);
             return;
@@ -59,7 +60,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
             return;
         }
 
-        //校验jwt
+        // 校验jwt
         boolean verifyResult = jwtUtils.verifyToken(jwtToken);
         if (!verifyResult) {
             log.error("jwt非法....................");
@@ -67,9 +68,10 @@ public class JwtCheckFilter extends OncePerRequestFilter {
             return;
         }
 
-        //判断redis是否存在jwt
-        String redisToken = (String)redisTemplate.opsForValue().get("logintoken:" + jwtToken);
-        if (StringUtils.isEmpty(redisToken)) {
+        // 判断redis是否存在jwt
+        // String redisToken = (String)redisTemplate.opsForValue().get("logintoken:" + jwtToken);
+        Object o = redisTemplate.opsForValue().get("logintoken:" + jwtToken);
+        if (ObjectUtils.isEmpty(o)) {
             ResponseUtil.out(response, ResultModel.error(HttpStatus.OK.value(), "您已经退出，请重新登录！！！！".toString()));
             return;
         }
@@ -77,13 +79,13 @@ public class JwtCheckFilter extends OncePerRequestFilter {
         //从jwt里获取用户信息和权限信息
         String userInfo = jwtUtils.getUserInfoFromToken(jwtToken);
         List<String> userAuthList = jwtUtils.getUserAuthFromToken(jwtToken);
-        //反序列化成 User 对象
+        // 反序列化成 User 对象
         User user = objectMapper.readValue(userInfo, User.class);
-        List<SimpleGrantedAuthority> authorityList=userAuthList.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        List<SimpleGrantedAuthority> authorityList = userAuthList.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
         //用户名密码认证token
-        UsernamePasswordAuthenticationToken token=new UsernamePasswordAuthenticationToken(user,null,authorityList);
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user, null, authorityList);
         // 把 token 放到安全上下文：securityContext
         SecurityContextHolder.getContext().setAuthentication(token);
-        doFilter(request,response,filterChain); // 放行
+        doFilter(request, response, filterChain); // 放行
     }
 }
