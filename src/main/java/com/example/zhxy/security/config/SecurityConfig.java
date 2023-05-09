@@ -195,6 +195,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // 注意: /login 不应出现在非安全的 web 放行资源配置中
                 .mvcMatchers("/login", "/logout").permitAll()
+                // 放行 swagger2
+                .mvcMatchers("/swagger-ui.html", "/v2/api-docs", "/webjars/**", "/swagger-resources/**").permitAll()
                 // 其他所有请求需要认证
                 .anyRequest().authenticated();
 

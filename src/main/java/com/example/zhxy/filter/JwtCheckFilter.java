@@ -24,7 +24,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,17 +39,17 @@ public class JwtCheckFilter extends OncePerRequestFilter {
     private ObjectMapper objectMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+    // 不需要添加 Authorization 的路径
+    private static final Set<String> ALLOWED_URIS = new HashSet<>(Arrays.asList("/login", "/common/captcha", "/download", "/upload/headerImgUpload", "/doc.html"));
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        // 如果是登录请求urI，直接放行
-        if (requestURI.equals("/login") || requestURI.equals("/common/captcha") || requestURI.equals("/download") || requestURI.equals("/upload/headerImgUpload")) {
+        if (ALLOWED_URIS.contains(requestURI)) {
             log.info("放行该请求.................");
             doFilter(request, response, filterChain);
             return;
         }
-
         String strAuth = request.getHeader("Authorization");
         if (StringUtils.isEmpty(strAuth)) {
             log.error("Authorization为空.............");

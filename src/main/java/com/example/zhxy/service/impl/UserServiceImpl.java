@@ -1,18 +1,16 @@
 package com.example.zhxy.service.impl;
 
 
-import com.example.zhxy.entity.pojo.User;
-import lombok.extern.slf4j.Slf4j;
-import com.example.zhxy.mapper.UserMapper;
-import com.example.zhxy.entity.pojo.User;
-import com.example.zhxy.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.zhxy.entity.pojo.User;
+import com.example.zhxy.mapper.UserMapper;
+import com.example.zhxy.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -41,7 +39,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 查询具体的用户信息
         if (!StringUtils.isEmpty(user.getUsername()) && !StringUtils.isEmpty(user.getUserType())) {
             queryWrapper
-                    .like("username", user.getUsername())
+                    .like("username", user.getUsername()) // 根据用户名
                     .eq("userType", user.getUserType());
             Page<User> userPage = baseMapper.selectPage(page, queryWrapper);
             return userPage;
